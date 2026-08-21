@@ -1,18 +1,25 @@
 name: Tests
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ["3.10"]
+        python: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
+      - name: Install
+        run: pip install -r requirements.txt
+      - name: Lint
+        run: |
+          isort --check-only --diff divessi tests export.py
+          flake8 divessi tests export.py
+          black --check divessi tests export.py
       - name: Tests
-        run: make tests
+        run: pytest
