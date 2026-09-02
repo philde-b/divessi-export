@@ -4,7 +4,8 @@
 
 Back up everything the MySSI app will hand over. The script talks to the same
 endpoint the app uses, stores the untouched JSON for every command that returns
-data, derives CSV tables from it, and downloads any media the payloads refer to.
+data, derives CSV tables from it, optionally creates a native Subsurface
+logbook, and downloads any media the payloads refer to.
 
 Nothing is filtered on the way in. A backup that keeps only a curated subset of
 fields is not a backup, so the raw response is always written first and every
@@ -56,6 +57,12 @@ Specific commands only:
 python export.py --only get_divelog,get_profile
 ```
 
+Export and create a Subsurface logbook in one run:
+
+```sh
+python export.py --subsurface
+```
+
 Options:
 
 | flag | effect |
@@ -66,6 +73,7 @@ Options:
 | `--only a,b` | fetch exactly these commands |
 | `--delay S` | seconds between requests, default 2 |
 | `--cooldown S` | one-time wait when the server goes silent, default 300 |
+| `--subsurface` | also write `subsurface.ssrf` for direct import into Subsurface |
 | `--no-media` | skip downloading referenced media |
 | `--media-any-host` | also download media hosted outside divessi.com |
 | `-v` | verbose logging |
@@ -76,6 +84,7 @@ Options:
 export/
   manifest.json                 what was probed, what returned data, counts
   divelog.csv                   curated logbook, compatible with the old script
+  subsurface.ssrf               optional native Subsurface logbook
   raw/<command>.json            untouched server response, one per command
   csv/<command>__<table>.csv    one CSV per list of objects in each response
   media/<hash>_<name>           photos, cards, PDFs referenced by the data
@@ -84,6 +93,25 @@ export/
 CSV files are UTF-8 with BOM so Excel opens them with accents intact. Nested
 keys are joined with dots, lists of objects are expanded with an index, and
 every row carries the union of all columns so ragged data never drops a field.
+
+## Subsurface conversion
+
+Use `--subsurface` to generate `export/subsurface.ssrf`. In Subsurface, choose
+**File > Import log files** and select that file. The converter maps dive
+numbers, dates, times, durations, maximum and average depths, temperatures,
+ratings, dive sites and GPS coordinates, buddies, dive leaders, cylinders,
+gas mixes, pressures, weights, notes and other supported fields.
+
+Every non-empty SSI field is also retained as `SSI:` extradata. This makes the
+`.ssrf` useful without throwing away information that Subsurface has no direct
+field for. MySSI summary-only dives do not contain a time-series depth profile,
+so the converter deliberately does not fabricate one.
+
+An existing raw backup can be converted without contacting SSI:
+
+```sh
+python -m divessi.subsurface export/raw/get_divelog.json my-dives.ssrf
+```
 
 ## Known commands
 

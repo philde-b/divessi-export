@@ -32,6 +32,7 @@ from divessi.constants import (
 from divessi.discover import discover
 from divessi.exceptions import AuthenticationException, DivessiException
 from divessi.flatten import tables, write_csv
+from divessi.subsurface import convert as convert_subsurface
 
 logger = logging.getLogger("divessi.export")
 
@@ -193,6 +194,11 @@ def main() -> int:
         "--no-media", action="store_true", help="do not download referenced media"
     )
     parser.add_argument(
+        "--subsurface",
+        action="store_true",
+        help="also create a native Subsurface .ssrf logbook",
+    )
+    parser.add_argument(
         "--media-any-host",
         action="store_true",
         help="download media from hosts outside divessi.com as well",
@@ -235,6 +241,11 @@ def main() -> int:
         candidates = list(DISCOVERY_CANDIDATES)
     else:
         candidates = list(KNOWN_COMMANDS)
+
+    # The converter needs the full get_divelog payload. Include it automatically
+    # so --subsurface remains useful alongside a restrictive --only list.
+    if args.subsurface and "get_divelog" not in candidates:
+        candidates.insert(0, "get_divelog")
 
     print(f"probing {len(candidates)} command(s) ...")
 
@@ -327,6 +338,31 @@ def main() -> int:
                 manifest["notes"].append("logbook is empty")
         except DivessiException as exc:
             manifest["notes"].append(f"curated divelog.csv failed: {exc}")
+
+    if args.subsurface:
+        if divelog_result and divelog_result["status"] == "data":
+            try:
+                raw_name = manifest["files"]["get_divelog"]["raw"]
+                subsurface_path = out / "subsurface.ssrf"
+                stats = convert_subsurface(out / "raw" / raw_name, subsurface_path)
+                manifest["files"]["subsurface.ssrf"] = {
+                    "dives": stats["dives"],
+                    "sites": stats["sites"],
+                    "buddy_links": stats["buddy_links"],
+                    "cylinders": stats["cylinders"],
+                    "extra_fields": stats["extra_fields"],
+                }
+                print(
+                    "wrote subsurface.ssrf with "
+                    f"{stats['dives']} dives and {stats['sites']} dive sites"
+                )
+            except (KeyError, ValueError) as exc:
+                manifest["notes"].append(f"Subsurface conversion failed: {exc}")
+                print(f"warning: Subsurface conversion failed: {exc}")
+        else:
+            manifest["notes"].append(
+                "Subsurface conversion requested but get_divelog returned no data"
+            )
 
     if media_urls and not args.no_media:
         print(f"downloading {len(set(media_urls))} media file(s) ...")
