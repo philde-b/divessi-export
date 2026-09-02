@@ -20,6 +20,6 @@ jobs:
         run: |
           isort --check-only --diff divessi tests export.py
           flake8 divessi tests export.py
-          black --check divessi tests export.py
+          black --check --diff divessi tests export.py
       - name: Tests
         run: pytest
