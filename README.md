@@ -1,6 +1,6 @@
 # DiveSSI export
 
-![license](https://img.shields.io/github/license/gerardpuig/divessi-export.svg)
+![license](https://img.shields.io/github/license/philde-b/divessi-export.svg)
 
 Back up everything the MySSI app will hand over. The script talks to the same
 endpoint the app uses, stores the untouched JSON for every command that returns
@@ -14,7 +14,7 @@ CSV is generated from that. Verified against the live API in August 2026.
 ## Install
 
 ```sh
-git clone https://github.com/gerardpuig/divessi-export.git
+git clone https://github.com/philde-b/divessi-export.git
 cd divessi-export
 python -m venv venv
 venv/bin/pip install -r requirements.txt        # Windows: venv\Scripts\pip
