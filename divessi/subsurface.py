@@ -23,7 +23,6 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Iterable
 
-
 TANK_TYPES = {19: "Steel", 20: "Aluminium"}
 
 
