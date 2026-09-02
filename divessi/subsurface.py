@@ -275,12 +275,8 @@ def meaningful_notes(row: dict[str, Any], unresolved_buddies: list[str]) -> str:
         and water_max is not None
         and abs(water_min - water_max) >= 0.05
     ):
-        temperature_range = (
-            f"{fmt_number(water_min, 1)}–{fmt_number(water_max, 1)} °C"
-        )
-        details.append(
-            f"SSI water temperature range: {temperature_range}"
-        )
+        temperature_range = f"{fmt_number(water_min, 1)}–{fmt_number(water_max, 1)} °C"
+        details.append(f"SSI water temperature range: {temperature_range}")
 
     code_fields = (
         ("Weather code", "odin_user_log_var_weather_id"),
