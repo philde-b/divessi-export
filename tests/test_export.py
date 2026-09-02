@@ -134,6 +134,7 @@ def test_main_end_to_end(tmp_path, monkeypatch, capsys):
         "get_divelog,get_profile,get_nothing",
         "--delay",
         "0",
+        "--subsurface",
     ]
 
     with requests_mock.Mocker() as m, mock.patch.object(sys, "argv", argv):
@@ -153,9 +154,11 @@ def test_main_end_to_end(tmp_path, monkeypatch, capsys):
     assert manifest["commands_unknown"] == ["get_nothing"]
     assert manifest["commands_skipped"] == []
     assert manifest["files"]["divelog.csv"]["rows"] == 1
+    assert manifest["files"]["subsurface.ssrf"]["dives"] == 1
     assert manifest["media"]["saved"] == 1
     assert (tmp_path / "raw" / "get_profile.json").exists()
     assert (tmp_path / "csv" / "get_divelog__logbook_details.csv").exists()
+    assert (tmp_path / "subsurface.ssrf").exists()
 
     out = capsys.readouterr().out
     assert "OK" in out and "get_nothing" in out
