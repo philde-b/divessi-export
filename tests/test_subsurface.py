@@ -17,9 +17,7 @@ def sample_payload():
                 "odin_dive_sites_meta_country": "United Kingdom",
             }
         ],
-        "logbook_buddies": [
-            {"id": 9, "firstname": "Example", "lastname": "Buddy"}
-        ],
+        "logbook_buddies": [{"id": 9, "firstname": "Example", "lastname": "Buddy"}],
         "logbook_details": [
             {
                 "odin_user_log_nr": 42,
